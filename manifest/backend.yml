@@ -1,0 +1,77 @@
+name: Expenses application
+
+entities:
+  Outcoming:
+    properties:
+      - name
+      - {
+          name: type,
+          type: choice,
+          options: { 
+            values: [
+              Rent,Food,Expenses,Internet,Taxes,Mobile,Electricity,Water,Gas,Streaming,Cable,School,Transportation,Car,Other
+              ]
+            }
+        }
+      - { name: amount, type: money, options: { currency: ARS } }
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date }
+      - { name: deletedAt, type: date }
+    belongsTo:
+      - Account
+  Incoming:
+    properties:
+      - { name: amount, type: money, options: { currency: ARS } }
+      - {
+          name: type,
+          type: choice,
+          options: { 
+            values: [
+              Salary,Sales,Extras,Stocks,Crypto,Other
+              ]
+            }
+        }
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date }
+      - { name: deletedAt, type: date }
+    belongsTo:
+      - Account
+  Account:
+    properties:
+      - fullName
+      - { name: birthdate, type: date }
+      - number
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date }
+      - { name: deletedAt, type: date }
+    belongsTo:
+      - Account
+      - City
+  Notifications:
+    properties:
+      - name
+      - number
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date }
+    belongsTo:
+      - Account
+  Plans:
+    properties:
+      - name
+      - description
+      - { name: amount, type: money, options: { currency: ARS } }
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date }
+    belongsToMany:
+      - Account
+  City:
+    properties:
+      - name
+  Subscriber:
+    properties:
+      - name
+      - { name: email, type: email }
+      - { name: subscriptionDate, type: date }
+    validation:
+      name: { minLength: 3 }
+      email: { required: true, contains: "@company.com" }
