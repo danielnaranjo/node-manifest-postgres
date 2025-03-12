@@ -1,77 +1,183 @@
 name: Expenses application
 
 entities:
-  Outcoming:
+
+  Plans:
     properties:
       - name
-      - {
-          name: type,
-          type: choice,
-          options: { 
-            values: [
-              Rent,Food,Expenses,Internet,Taxes,Mobile,Electricity,Water,Gas,Streaming,Cable,School,Transportation,Car,Other
-              ]
-            }
-        }
-      - { name: amount, type: money, options: { currency: ARS } }
-      - { name: createdAt, type: date }
-      - { name: updatedAt, type: date }
-      - { name: deletedAt, type: date }
-    belongsTo:
-      - Account
-  Incoming:
+      - { name: description, type: text }
+      - { name: amount, type: string }
+      - { name: createdAt, type: date, hidden: true }
+      - { name: updatedAt, type: date, hidden: true }
+      - { name: deletedAt, type: date, hidden: true }
+    policies:
+      create:
+        - access: admin
+      update:
+        - access: admin
+      delete:
+        - access: admin
+    middlewares:
+      beforeCreate:
+        - handler: createdAt
+      beforeUpdate:
+        - handler: updatedAt
+    validation:
+      name: { minLength: 3 }
+      amount: { minLength: 1 }
+      createdAt: { isEmpty: true }
+      updatedAt: { isEmpty: true }
+      deletedAt: { isEmpty: true }
+
+  Categories:
     properties:
-      - { name: amount, type: money, options: { currency: ARS } }
+      - name
+      - { name: description, type: text }
       - {
           name: type,
           type: choice,
           options: { 
             values: [
-              Salary,Sales,Extras,Stocks,Crypto,Other
+              Salary,
+              Sales,
+              Extras,
+              Stocks,
+              Crypto,
+              Rent,
+              Food,
+              Expenses,
+              Internet,
+              Taxes,
+              Mobile,
+              Electricity,
+              Water,
+              Gas,
+              Streaming,
+              Cable,
+              School,
+              Transportation,
+              Car,
+              Other
               ]
             }
         }
-      - { name: createdAt, type: date }
-      - { name: updatedAt, type: date }
-      - { name: deletedAt, type: date }
-    belongsTo:
-      - Account
-  Account:
+    validation:
+      name: { minLength: 3 }
+    policies:
+      create:
+        - access: admin
+      update:
+        - access: admin
+      delete:
+        - access: admin
+    middlewares:
+      beforeCreate:
+        - handler: createdAt
+      beforeUpdate:
+        - handler: updatedAt
+
+  Accounts:
     properties:
       - fullName
+      - { name: number, type: string, hidden: true }
+      - { name: gender, type: choice, options: { values: [male, female, other] } }
+      - city
+      - country
+      - { name: isActive, type: boolean }
       - { name: birthdate, type: date }
-      - number
-      - { name: createdAt, type: date }
-      - { name: updatedAt, type: date }
-      - { name: deletedAt, type: date }
+      - { name: createdAt, type: date, hidden: true }
+      - { name: updatedAt, type: date, hidden: true }
+      - { name: deletedAt, type: date, hidden: true }
+    middlewares:
+      beforeCreate:
+        - handler: createdAt
+      beforeUpdate:
+        - handler: updatedAt
+      afterCreate:
+        - handler: sendEmail
     belongsTo:
-      - Account
-      - City
+      - Plans
+    validation:
+      fullName: { minLength: 3 }
+      number: { minLength: 10 }
+    policies:
+      read: 
+        - { access: restricted, allow: [User, Admin] }
+      update:
+        - { access: restricted, allow: [User, Admin] }
+      delete:
+        - access: admin
+
+  Transactions:
+    properties:
+      - name
+      - { name: description, type: text }
+      - { name: amount, type: string }
+      - { name: createdAt, type: date }
+      - { name: updatedAt, type: date, hidden: true }
+      - { name: deletedAt, type: date, hidden: true }
+      - { name: reportedAt, type: date }
+      - { name: location, type: location }
+    validation:
+      name: { minLength: 3 }
+      amount: { minLength: 1 }
+    belongsTo:
+      - Accounts
+      - Categories
+    policies:
+      read: 
+        - { access: restricted, allow: Admin }
+      create:
+        - { access: restricted, allow: User }
+      update:
+        - { access: restricted, allow: [User, Admin] }
+      delete:
+        - access: admin
+    middlewares:
+      beforeCreate:
+        - handler: createdAt
+      beforeUpdate:
+        - handler: updatedAt
+
   Notifications:
     properties:
       - name
       - number
-      - { name: createdAt, type: date }
+      - {
+          name: type,
+          type: choice,
+          options: { 
+            values: [
+              Analytics,
+              Marketing,
+              Sales,
+              Support,
+              Development,
+              Other
+            ]
+          }
+        }
+      - { name: createdAt, type: date}
       - { name: updatedAt, type: date }
-    belongsTo:
-      - Account
-  Plans:
-    properties:
-      - name
-      - description
-      - { name: amount, type: money, options: { currency: ARS } }
-      - { name: createdAt, type: date }
-      - { name: updatedAt, type: date }
-    belongsToMany:
-      - Account
-  City:
-    properties:
-      - name
-  Subscriber:
-    properties:
-      - name
-      - { name: email, type: email }
-      - { name: subscriptionDate, type: date }
     validation:
       name: { minLength: 3 }
-      email: { required: true, contains: "@company.com" }
+      number: { minLength: 10 }
+    belongsTo:
+      - Accounts
+    policies:
+      read:
+        - access: admin
+      create:
+        - access: admin
+      update:
+        - access: admin
+      delete:
+        - access: admin
+    middlewares:
+      beforeCreate:
+        - handler: createdAt
+      beforeUpdate:
+        - handler: updatedAt
+
+endpoints:
+  helloWorld: { path: /hello-world, method: GET, handler: helloWorld }
